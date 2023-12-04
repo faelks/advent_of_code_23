@@ -1,0 +1,13 @@
+# Cube Conondrum
+
+Some amount of cubes, red, blue and green.
+There are N cubes in total.
+Each "play", C amount of cubes are hidden in the bag.
+
+Each game is recorded on a line in the following format:
+Game X: ((B blue)?, (R red)?, (G green)?;)+
+
+What games would be possible if R=12, B=14, G=13?
+
+What is the sum of the ids that match this configuration? 
+
