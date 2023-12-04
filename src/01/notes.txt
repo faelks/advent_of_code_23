@@ -1,0 +1,8 @@
+# Trebuchet
+
+A calibration document with lines of text.
+Each line maps to a calibration value.
+
+Found by combining the first digit and the last digit to form a 2 digit number
+
+What is the sum of all these calibration values?
