@@ -1,0 +1,6 @@
+# Gear Ratios
+
+Adding up part numbers of an "engine schematic"
+Visual representations of the engine.
+Any number adjacent to a symbol is a "part number"
+Periods are not symbols
