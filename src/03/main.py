@@ -1,5 +1,7 @@
 from pathlib import Path
 
+GEAR_SYMBOL = "*"
+
 
 def read_file(filename: str):
     """Read the provided filename and return a list of lines"""
@@ -9,98 +11,75 @@ def read_file(filename: str):
     return [line.strip() for line in file]
 
 
-def adjacent_col_indices(col_indices: list[int], max_index: int):
-    """Return a list of adjacent indices"""
-    first = col_indices[0]
-    before_first = max(first - 1, 0)
-    last = col_indices[-1]
-    after_last = min(last + 1, max_index)
-
-    return [
-        [before_first, *col_indices, after_last],
-        [before_first, after_last],
-        [before_first, *col_indices, after_last],
-    ]
-
-
-def is_symbol(char: str):
-    """Return a boolean whether the char is a symbol"""
-    return not char.isnumeric() and char != "."
-
-
 def main():
     print("Advent of code 03")
 
     filename = "input.txt"
+    # filename = "test-1.txt"
     lines = read_file(filename)
 
     gears = {}
+    rows = len(lines)
+    cols = len(lines[0])
+    max_row_index = rows - 1
+    max_col_index = cols - 1
 
-    max_index = len(lines[0]) - 1
-    part_sum = 0
+    print(f"Received matrix of: {rows} x {cols}")
+
     for row, line in enumerate(lines):
-        indices: list[int] = []
+        number_indices: list[int] = []
         number = ""
 
+        # Process the subsequent row to be able to add to gears
+        if row < max_row_index:
+            for col, char in enumerate(lines[row + 1]):
+                pos = (row + 1, col)
+                if char == GEAR_SYMBOL:
+                    gears[pos] = []
+
         for col, char in enumerate(line):
+            # Add numeric characters to number store
             if char.isnumeric():
                 number += char
-                indices.append(col)
+                number_indices.append(col)
 
-            if char == "*":
-                gears[(row, col)] = []
+            # Process number
+            # If not start of line
+            # And we encounter a character after some numbers
+            # If end of line then process if number store is not empty
+            if col == 0:
+                continue
 
-            if (
-                char.isnumeric()
-                and col == len(line) - 1
-                or not char.isnumeric()
-                and number
-            ):
-                prev_line = lines[row - 1] if row > 0 else None
-                next_line = lines[row + 1] if row < len(lines) - 1 else None
-
-                [prev, cur, next] = adjacent_col_indices(indices, max_index)
+            line_ending_number = char.isnumeric() and col == max_col_index
+            symbol_encountered = number and not char.isnumeric()
+            if line_ending_number or symbol_encountered:
                 current_number = int(number)
 
-                for col_p in prev:
-                    row_col = (row, col_p)
-                    if row_col in gears and current_number not in gears[row_col]:
-                        gears[row_col].append(current_number)
+                row_low = max(0, row - 1)
+                col_low = max(0, number_indices[0] - 1)
 
-                for col_c in cur:
-                    row_col = (row, col_c)
-                    if row_col in gears and current_number not in gears[row_col]:
-                        gears[row_col].append(current_number)
+                row_high = min(max_row_index, row + 1)
+                col_high = min(max_col_index, number_indices[-1] + 1)
 
-                for col_n in next:
-                    row_col = (row, col_n)
-                    if row_col in gears and current_number not in gears[row_col]:
-                        gears[row_col].append(current_number)
+                for rw in range(row_low, row_high + 1):
+                    for cw in range(col_low, col_high + 1):
+                        pos = (rw, cw)
+                        if pos in gears:
+                            gears[pos].append(current_number)
+                            break
 
+                # Reset state
                 number = ""
-                indices = []
-
-                if prev_line and any(is_symbol(prev_line[i]) for i in prev):
-                    part_sum += current_number
-                    continue
-
-                if next_line and any(is_symbol(next_line[i]) for i in next):
-                    part_sum += current_number
-                    continue
-
-                if any(is_symbol(line[i]) for i in cur):
-                    part_sum += current_number
-                    continue
+                number_indices = []
 
     gears_with_two = [v for v in gears.values() if len(v) == 2]
     gear_products = [v[0] * v[1] for v in gears_with_two]
     gear_sum = sum(gear_products)
 
-    print(gears_with_two)
-    print(gear_products)
-
-    print(f"Sum: {part_sum}")
-    print(f"Gear sum: {gear_sum}")
+    # print("Gears:", gears)
+    # print("Valued Gears:", gears_with_two)
+    # print("Gear Products:", gear_products)
+    print(f"Gear Product Sum: {gear_sum}")
 
 
 if __name__ == "__main__":
